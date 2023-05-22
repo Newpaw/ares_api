@@ -12,8 +12,7 @@ def verify_ico(ico:str) -> bool:
 
 
 def main():
-    ico = verify_ico("00007064")
-    print(ico)
-# Spuštění hlavní funkce
+    pass
+
 if __name__ == "__main__":
     main()
