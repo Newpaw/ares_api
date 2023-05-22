@@ -14,13 +14,13 @@ logging.basicConfig(
 @dataclass
 class AresCompany:
     ico: str
-    name: str
-    address: str
-    psc: str
-    legal_form: str
+    name: Optional[str]
+    address: Optional[str]
+    psc: Optional[str]
+    legal_form: Optional[str]
     business_fields: Optional[List[str]]
-    size: str
-    base_cz_nace: str = None
+    size: Optional[str]
+    base_cz_nace: Optional[str] = None
 
 ATTRIBUTE_TAGS = {
     "name": "D:OF",
