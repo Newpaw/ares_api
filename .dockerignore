@@ -1,0 +1,7 @@
+# Files and directories to be ignored by Docker
+.dockerignore
+.git
+.gitignore
+*.pyc
+*.pyo
+__pycache__
