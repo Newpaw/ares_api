@@ -20,7 +20,8 @@ class AresCompany:
     legal_form: Optional[str]
     business_fields: Optional[List[str]]
     size: Optional[str]
-    base_cz_nace: Optional[str] = None
+    main_cz_nace: Optional[str] = None
+    based_main_cz_nace: Optional[str] = None
 
 ATTRIBUTE_TAGS = {
     "name": "D:OF",
