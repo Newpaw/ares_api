@@ -4,3 +4,4 @@ fastapi-utils
 requests
 bs4
 lxml
+redis
