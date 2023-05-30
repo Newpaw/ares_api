@@ -5,8 +5,8 @@ from fastapi.responses import HTMLResponse
 
 from ares import get_company_data_ares, AresCompany
 from czso import czso_get_website_content, czso_parse_content, czso_get_base_cz_nace
+from vat_new import VatInfo, Company
 from verification import verify_ico
-
 
 app = FastAPI()
 
@@ -15,6 +15,8 @@ logging.basicConfig(
     level=logging.INFO,
     datefmt="%Y-%m-%d %H:%M:%S",
 )
+
+
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -60,3 +62,37 @@ def get_company(company_ico: str):
         return json_data
     else:
         raise HTTPException(status_code=400, detail="Invalid ICO")
+
+
+@app.get(
+    "/companyVAT/{vat_number}",
+    description="Get company information by VAT number.",
+    response_model=Company
+)
+def get_vat_company(vat_number: str):
+    striped_vat_ico = vat_number.strip()
+    logging.info(f"Someone asked for VAT: {striped_vat_ico}")
+
+    vat_info = VatInfo(striped_vat_ico)
+    company = vat_info.get_vat_info()
+    
+    logging.info(company)
+    #cached_info = company.get_cached_company_info()
+    #if cached_info is not None:
+    #    logging.info(f"Company info from cache: {cached_info}")
+    #    return cached_info
+    #else:
+    #    html = company.get_company_info()
+    #    company_info = CompanyByVAT.parse_company_info(html)
+    #    
+    #    if all(value == "" for value in company_info.values()):
+    #        logging.info("Company info is empty, not caching.")
+    #    else:
+    #        company.cache_company_info(company_info)
+    #        logging.info(f"Company info from web: {company_info}")
+
+
+    if company.isValid:
+        return company
+    else:
+        raise HTTPException(status_code=400, detail=company.userError)
