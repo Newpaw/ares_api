@@ -3,70 +3,39 @@
 
 <head>
     <title>My API</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css">
-    <style>
-        body {
-            background-color: #f3f3f3;
-        }
-
-        .container {
-            background-color: #ffffff;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 50px;
-        }
-
-        h1,
-        h2 {
-            color: #007bff;
-        }
-
-        .mt-5 {
-            margin-top: 30px;
-        }
-
-        .mt-5,
-        .mb-4 {
-            color: #343a40;
-        }
-
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-
-        .btn-primary:hover {
-            background-color: #0069d9;
-            border-color: #0062cc;
-        }
-
-        pre {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 10px;
-        }
-    </style>
 </head>
 
-<body>
-    <div class="container">
-        <h1 class="mb-4">Welcome to My API</h1>
+<body class="bg-light">
+    <div class="container bg-white p-5 mt-5 rounded">
+        <h1 class="mb-4 text-primary">Welcome to My API</h1>
         <p>This is an awesome API that does amazing things!</p>
         <p>Check out the <a href="/docs">API documentation</a> for more details.</p>
         <hr>
-        <h2 class="mt-5">About the API</h2>
+        <h2 class="mt-5 text-primary">About the API</h2>
         <p>The My API is designed to provide data on Czech companies using the ARES system. It offers information about
-            company details, including identification number (ICO), name, address, postal code, legal form, business
+            company details, including identification number (ICO), VAT number, name, address, postal code, legal form, business
             fields, and size.</p>
         <p>To access the API, you can use the provided endpoints and parameters to retrieve the desired company
             information.</p>
         <hr>
-        <h2 class="mt-5">Sample Code</h2>
-        <p>Here's an example of how you can use the API to retrieve company data:</p>
-        <pre><code>import requests
+        <h2 class="mt-5 text-primary">Sample Code</h2>
+        <p>Here's an example of how you can use the API to retrieve company data by ICO:</p>
+        <pre class="p-3 bg-light border border-secondary rounded"><code>import requests
 
 url = "https://ares.novopacky.com/company/{company_id}"
+response = requests.get(url)
+
+if response.status_code == 200:
+    data = response.json()
+    # Process the retrieved data
+    # ...
+</code></pre>
+        <p>And this is how you can use it to find a company by its VAT number:</p>
+        <pre class="p-3 bg-light border border-secondary rounded"><code>import requests
+
+url = "https://ares.novopacky.com/companyVAT/{vat_number}"
 response = requests.get(url)
 
 if response.status_code == 200:
