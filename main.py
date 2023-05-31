@@ -2,6 +2,7 @@ import logging
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import HTMLResponse
+from pathlib import Path
 
 from ares import get_company_data_ares, AresCompany
 from czso import czso_get_website_content, czso_parse_content, czso_get_base_cz_nace
@@ -17,8 +18,13 @@ logging.basicConfig(
 )
 
 
+def raise_http_400_error(detail: str):
+    raise HTTPException(status_code=400, detail=detail)
 
 
+def check_for_spaces(input_string: str, error_message: str):
+    if input_string != input_string.strip():
+        raise_http_400_error(error_message)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -29,8 +35,8 @@ def get_root(request: Request):
     else:
         logging.warning("X-Forwarded-For header not found")
 
-    with open("index.html", "r") as file:
-        return file.read()
+    index_file = Path("index.html").read_text()
+    return index_file
 
 
 @app.get(
@@ -39,50 +45,50 @@ def get_root(request: Request):
     response_model=AresCompany,
 )
 def get_company(company_ico: str):
-    if verify_ico(company_ico):
-        striped_company_ico = company_ico.strip()
-        logging.info(f"Someone asked for IČO: {striped_company_ico}")
-        company_data = get_company_data_ares(striped_company_ico)
+    check_for_spaces(company_ico, "IČ number should not contain spaces.")
 
-        content = czso_get_website_content(striped_company_ico)
-        parsed_content = czso_parse_content(content)
-        if parsed_content:
-            ares_main_economic_activity_cz_nace = str(parsed_content[0])
-            ares_based_main_economic_activity_cz_nace = czso_get_base_cz_nace(
-                ares_main_economic_activity_cz_nace
-            )
+    if not verify_ico(company_ico):
+        raise_http_400_error("Invalid ICO")
 
-            setattr(company_data, "main_cz_nace", ares_main_economic_activity_cz_nace)
-            setattr(
-                company_data,
-                "based_main_cz_nace",
-                ares_based_main_economic_activity_cz_nace,
-            )
+    logging.info(f"Someone asked for IČO: {company_ico}")
+    company_data = get_company_data_ares(company_ico.strip())
 
-        json_data = jsonable_encoder(company_data)
+    content = czso_get_website_content(company_ico.strip())
+    parsed_content = czso_parse_content(content)
+    if parsed_content:
+        ares_main_economic_activity_cz_nace = str(parsed_content[0])
+        ares_based_main_economic_activity_cz_nace = czso_get_base_cz_nace(
+            ares_main_economic_activity_cz_nace
+        )
 
-        return json_data
-    else:
-        raise HTTPException(status_code=400, detail="Invalid ICO")
+        setattr(company_data, "main_cz_nace", ares_main_economic_activity_cz_nace)
+        setattr(
+            company_data,
+            "based_main_cz_nace",
+            ares_based_main_economic_activity_cz_nace,
+        )
+
+    return jsonable_encoder(company_data)
 
 
 @app.get(
     "/companyVAT/{vat_number}",
     description="Get company information by VAT number.",
-    response_model=Company
+    response_model=Company,
 )
 def get_vat_company(vat_number: str):
-    if verify_vat(vat_number):
-        striped_vat_ico = str(vat_number).strip()
-        logging.info(f"Someone asked for VAT: {striped_vat_ico}")
+    check_for_spaces(vat_number, "VAT number should not contain spaces.")
 
-        vat_info = VatInfo(striped_vat_ico)
-        company = vat_info.get_vat_info()
-        
-        #test by the request and not by the pyvat library
-        if company.isValid:
-            return company
-        else:
-            raise HTTPException(status_code=400, detail=company.userError)
-    else:
-        raise HTTPException(status_code=400, detail="Invalid VAT number based on library pyvat.")
+    if not verify_vat(vat_number):
+        raise_http_400_error("Invalid VAT number based on library pyvat.")
+
+    vat_info = VatInfo(vat_number.strip())
+    company = vat_info.get_vat_info()
+
+    if company is None:
+        raise_http_400_error("Company doesn´t exist.")
+
+    if not company.isValid:
+        raise_http_400_error(company.userError)
+
+    return company

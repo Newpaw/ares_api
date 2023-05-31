@@ -29,11 +29,15 @@ def verify_ico(ico: str) -> bool:
 
 def verify_vat(vat: str) -> bool:
     stried_vat = str(vat).strip()
-    country_code = stried_vat[:2]
-    vat_number = stried_vat[2:]
-    is_vat_ok = is_vat_number_format_valid(vat_number=vat_number, country_code=country_code)
-    logging.info(f"VAT {stried_vat} is {is_vat_ok}.")
-    return is_vat_ok
+    try:
+        country_code = stried_vat[:2]
+        vat_number = stried_vat[2:]
+        is_vat_ok = is_vat_number_format_valid(vat_number=vat_number, country_code=country_code)
+        logging.info(f"Verification for VAT {stried_vat} based on library pyvat is {is_vat_ok}.")
+        return is_vat_ok
+    except Exception as e:
+        logging.error(f"Exception: {e}")
+        return None
 
 
 
