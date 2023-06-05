@@ -27,7 +27,7 @@ def get_company_data_by_domain(company_domain:str) -> dict | None:
 
         # Try to convert the response to JSON
         json_response = response.json()
-        logging.info("Request OK!")
+        logging.info(f"Request for company domain {company_domain} is OK!")
         return json_response
 
     except requests.exceptions.HTTPError as err:
@@ -42,9 +42,17 @@ def get_company_data_by_domain(company_domain:str) -> dict | None:
     except requests.exceptions.RequestException as err:
         logging.error(f"Other requests exception occurred: {err}")
 
+def get_logo_src(company_data):
+    for logo in company_data['logos']:
+        if logo['type'] == 'logo':
+            for format in logo['formats']:
+                return format['src']
+    return None
+
 def main():
     response = get_company_data_by_domain("mluvii.com")
-    print(response)
+    url = get_logo_src(response)
+    print(url)
 
 
 if __name__ == "__main__":
