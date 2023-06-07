@@ -1,13 +1,15 @@
+import os
 import logging
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from pathlib import Path
 
 from ares import get_company_data_ares, AresCompany
 from czso import czso_get_website_content, czso_parse_content, czso_get_base_cz_nace
 from vat_new import VatInfo, Company
 from verification import verify_ico, verify_vat
+from brandfetch_info import get_logo, get_logo_path
 
 app = FastAPI()
 
@@ -92,3 +94,15 @@ def get_vat_company(vat_number: str):
         raise_http_400_error(company.userError)
 
     return company
+
+
+@app.get("/logo/{domain}", response_class=FileResponse, tags=["logo"], description="Download and save a company logo by domain.")
+def get_company_logo(domain: str):
+    get_logo(domain)
+
+    logo_path = get_logo_path(domain)
+    
+    if logo_path:
+        return FileResponse(logo_path, media_type="image/png")
+
+    raise HTTPException(status_code=404, detail="Logo not found")
