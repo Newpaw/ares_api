@@ -3,8 +3,9 @@ import requests
 import logging
 import json
 import glob
+import cairosvg
 
-from typing import Dict
+from typing import Dict, Optional
 
 import importlib
 
@@ -173,12 +174,32 @@ def get_logo(domain:str):
             save_image(image_data, file_path)
 
 def get_logo_path(domain):
-    files = glob.glob(f"{domain}/*.png")
+    files = glob.glob(f"{domain}/*")
+    img_files = [f for f in files if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff', '.svg'))]
 
-    if files:
-        return files[0]
-    logging.info(f"No file with {domain}found.")
+    if img_files:
+        return img_files[0]
+    logging.info(f"No image file with domain {domain} found.")
     return None
+
+def get_media_type(file_path: str) -> Optional[str]:
+    extension = os.path.splitext(file_path)[1].lower()
+    media_types = {
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.gif': 'image/gif',
+        '.bmp': 'image/bmp',
+        '.tiff': 'image/tiff',
+        '.svg': 'image/svg+xml'
+    }
+    return media_types.get(extension)
+
+
+def convert_svg_to_png(file_path: str) -> str:
+    png_file_path = os.path.splitext(file_path)[0] + '.png'
+    cairosvg.svg2png(url=file_path, write_to=png_file_path)
+    return png_file_path
 
 def main():
     pass
