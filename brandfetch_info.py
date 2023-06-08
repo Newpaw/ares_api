@@ -157,7 +157,7 @@ def get_logo(domain:str):
     Parameters:
     domain (str): Domain in string without http:// or https:// 
     """
-    directory = os.path.join(os.getcwd(), domain)  # get current working directory and domain as folder
+    directory = os.path.join(os.getcwd(), "logos", domain)  # get current working directory and domain as folder
 
     if os.path.exists(directory):
         logging.info(f"Directory '{directory}' already exists. Skipping download.")
@@ -168,13 +168,13 @@ def get_logo(domain:str):
     if is_url_image(url):
         image_data = download_image(url)
         if image_data is not None:
-            os.makedirs(domain, exist_ok=True)
+            os.makedirs(directory, exist_ok=True)
             filename = url.split("/")[-1]
-            file_path = os.path.join(domain, filename)
+            file_path = os.path.join(directory, filename)
             save_image(image_data, file_path)
 
 def get_logo_path(domain):
-    files = glob.glob(f"{domain}/*")
+    files = glob.glob(f"logos/{domain}/*")
     img_files = [f for f in files if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff', '.svg'))]
 
     if img_files:

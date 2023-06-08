@@ -96,7 +96,12 @@ def get_vat_company(vat_number: str):
     return company
 
 
-@app.get("/logo/{domain}", response_class=FileResponse, tags=["logo"], description="Download and save a company logo by domain.")
+@app.get(
+    "/logo/{domain}",
+    response_class=FileResponse,
+    tags=["logo"],
+    description="Download and save a company logo by domain. Please provide a pure domain name, e.g., 'mluvii.com', not 'https://mluvii.com'.",
+)
 def get_company_logo(domain: str):
     domain_better_formated = get_better_formated_domain(domain.lower())
     get_logo(domain_better_formated)
@@ -104,8 +109,8 @@ def get_company_logo(domain: str):
     logo_path = get_logo_path(domain_better_formated)
 
     if logo_path:
-        if logo_path.lower().endswith('.svg'):
+        if logo_path.lower().endswith(".svg"):
             logo_path = convert_svg_to_png(logo_path)
-        return FileResponse(logo_path, media_type='image/png')
+        return FileResponse(logo_path, media_type="image/png")
 
     raise HTTPException(status_code=404, detail="Logo not found")
