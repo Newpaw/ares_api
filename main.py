@@ -103,7 +103,7 @@ def get_vat_company(vat_number: str):
     description="Download and save a company logo by domain. Please provide a pure domain name, e.g., 'mluvii.com', not 'https://mluvii.com'.",
 )
 def get_company_logo(domain: str):
-    domain_better_formated = get_better_formated_domain(domain.lower())
+    domain_better_formated = get_better_formated_domain(domain.lower().strip())
     get_logo(domain_better_formated)
 
     logo_path = get_logo_path(domain_better_formated)
