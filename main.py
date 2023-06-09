@@ -103,7 +103,11 @@ def get_vat_company(vat_number: str):
     description="Download and save a company logo by domain. Please provide a pure domain name, e.g., 'mluvii.com', not 'https://mluvii.com'.",
 )
 def get_company_logo(domain: str):
+    if domain is None:
+        raise HTTPException(status_code=404, detail="No input")
+        
     domain_better_formated = get_better_formated_domain(domain.lower().strip())
+    company_name = domain_better_formated.split('.')[0]
     get_logo(domain_better_formated)
 
     logo_path = get_logo_path(domain_better_formated)
@@ -111,6 +115,6 @@ def get_company_logo(domain: str):
     if logo_path:
         if logo_path.lower().endswith(".svg"):
             logo_path = convert_svg_to_png(logo_path)
-        return FileResponse(logo_path, media_type="image/png")
+        return FileResponse(logo_path, media_type="image/png", filename=company_name)
 
     raise HTTPException(status_code=404, detail="Logo not found")
