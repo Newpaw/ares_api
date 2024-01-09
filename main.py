@@ -4,7 +4,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import HTMLResponse, FileResponse
 from pathlib import Path
 
-from ares import get_company_data_ares, AresCompany
+from ares import AresCompany, new_get_company_data_ares
 from helper import get_better_formated_domain
 from czso import czso_get_website_content, czso_parse_content, czso_get_base_cz_nace
 from vat_new import VatInfo, Company
@@ -22,6 +22,9 @@ logging.basicConfig(
 
 def raise_http_400_error(detail: str):
     raise HTTPException(status_code=400, detail=detail)
+
+def raise_http_404_error(detail: str):
+    raise HTTPException(status_code=404, detail=detail)
 
 
 def check_for_spaces(input_string: str, error_message: str):
@@ -47,13 +50,16 @@ def get_root(request: Request):
     response_model=AresCompany,
 )
 def get_company(company_ico: str):
+    logging.info(f"Someone asked for IČO: {company_ico}")
     check_for_spaces(company_ico, "IČ number should not contain spaces.")
-
     if not verify_ico(company_ico):
         raise_http_400_error("Invalid ICO")
 
-    logging.info(f"Someone asked for IČO: {company_ico}")
-    company_data = get_company_data_ares(company_ico.strip())
+    
+    company_data = new_get_company_data_ares(company_ico.strip())
+
+    if company_data is None:
+        raise_http_404_error("IČO doesn´t found.")
 
     content = czso_get_website_content(company_ico.strip())
     parsed_content = czso_parse_content(content)
